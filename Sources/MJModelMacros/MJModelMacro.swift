@@ -15,7 +15,7 @@ public struct MJModelIgnore: PeerMacro {
     }
 }
 
-public struct MJModel: ExtensionMacro, MemberMacro {
+public struct MJModel: ExtensionMacro, MemberMacro, MemberAttributeMacro {
 
     public static func expansion(of node: SwiftSyntax.AttributeSyntax,
                                  attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
@@ -38,13 +38,22 @@ public struct MJModel: ExtensionMacro, MemberMacro {
                                  providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax,
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax]
     {
-        // TODO: diagnostic do not implement `init(from:)` or `encode(to:))`
-        
+        var decls: [DeclSyntax] = []
         let propertyContainer = try ModelMemberPropertyContainer(decl: declaration, context: context)
-        let objectClassInArray = try propertyContainer.genObjectClassInArray()
-        let replacedKey = try propertyContainer.genReplacedKey()
-        let ignored = try propertyContainer.genIgnored()
-        return [objectClassInArray, replacedKey, ignored]
+        if let objectClassInArray = try propertyContainer.genObjectClassInArray() {
+            decls.append(objectClassInArray)
+        }
+        if let replacedKey = try propertyContainer.genReplacedKey() {
+            decls.append(replacedKey)
+        }
+        if let ignored = try propertyContainer.genIgnored() {
+            decls.append(ignored)
+        }
+        return decls
+    }
+    
+    public static func expansion(of node: SwiftSyntax.AttributeSyntax, attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, providingAttributesFor member: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.AttributeSyntax] {
+        return ["@objc"]
     }
     
 }

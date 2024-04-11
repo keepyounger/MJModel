@@ -13,7 +13,7 @@ private struct ModelMemberProperty {
         if normalKeys.isEmpty {
             return raw
         }
-        return raw + normalKeys
+        return normalKeys + raw
     }
 }
 
@@ -29,7 +29,7 @@ struct ModelMemberPropertyContainer {
         memberProperties = try fetchModelMemberProperties()
     }
     
-    func genObjectClassInArray() throws -> DeclSyntax {
+    func genObjectClassInArray() throws -> DeclSyntax? {
         
         var body: [String] = []
         for member in memberProperties where !member.typeInArray.isEmpty {
@@ -40,7 +40,7 @@ struct ModelMemberPropertyContainer {
         }
         
         if body.isEmpty {
-            body.append(":")
+            return nil
         }
         
         let decoder: DeclSyntax = """
@@ -52,7 +52,7 @@ struct ModelMemberPropertyContainer {
         return decoder
     }
     
-    func genReplacedKey() throws -> DeclSyntax {
+    func genReplacedKey() throws -> DeclSyntax? {
         var body: [String] = []
         for member in memberProperties where !member.normalKeys.isEmpty {
             let element = """
@@ -62,7 +62,7 @@ struct ModelMemberPropertyContainer {
         }
         
         if body.isEmpty {
-            body.append(":")
+            return nil
         }
         
         let decoder: DeclSyntax = """
@@ -74,7 +74,7 @@ struct ModelMemberPropertyContainer {
         return decoder
     }
     
-    func genIgnored() throws -> DeclSyntax {
+    func genIgnored() throws -> DeclSyntax? {
         var body: [String] = []
         for member in memberProperties where member.isIgnored {
             let element = """
@@ -82,6 +82,11 @@ struct ModelMemberPropertyContainer {
             """
             body.append(element)
         }
+        
+        if body.isEmpty {
+            return nil
+        }
+        
         let decoder: DeclSyntax = """
         static override func mj_ignoredPropertyNames() -> [Any]! {
             return [\(raw: body.joined(separator: ", "))]

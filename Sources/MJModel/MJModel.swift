@@ -1,4 +1,5 @@
-@attached(member, names: overloaded)
+@attached(member, names: named(mj_objectClassInArray()), named(mj_replacedKeyFromPropertyName()), named(mj_ignoredPropertyNames()))
+@attached(memberAttribute)
 public macro MJModel() = #externalMacro(module: "MJModelMacros", type: "MJModel")
 
 @attached(peer)
